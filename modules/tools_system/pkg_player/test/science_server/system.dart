@@ -2,10 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:unit_env/unit_env.dart';
 
 void main() async {
-  late Host host;
+  late RequestHost<HostEnv> host;
 
   setUpAll(() async {
-    host = Unit3Host();
+    host = const FlutterUnitHost();
     FxDio().register(host);
     // initHttp(app);
     // request = HouseDetailRequest();

@@ -62,7 +62,8 @@ import 'app_localizations_zh.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,7 +84,8 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -148,6 +151,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'留言板'**
   String get messageBoard;
+
+  /// No description provided for @blacklist.
+  ///
+  /// In zh, this message translates to:
+  /// **'黑名单'**
+  String get blacklist;
 
   /// No description provided for @homeAccountTabMe.
   ///
@@ -250,6 +259,588 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'我的收藏'**
   String get userCollection;
+
+  /// No description provided for @avatarAchievements.
+  ///
+  /// In zh, this message translates to:
+  /// **'头像徽章'**
+  String get avatarAchievements;
+
+  /// No description provided for @taskAchievements.
+  ///
+  /// In zh, this message translates to:
+  /// **'任务成就'**
+  String get taskAchievements;
+
+  /// No description provided for @workshop.
+  ///
+  /// In zh, this message translates to:
+  /// **'匠心工坊'**
+  String get workshop;
+
+  /// No description provided for @exchangeHistory.
+  ///
+  /// In zh, this message translates to:
+  /// **'兑换记录'**
+  String get exchangeHistory;
+
+  /// No description provided for @noExchangeHistory.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无兑换记录'**
+  String get noExchangeHistory;
+
+  /// No description provided for @noWorkshopProducts.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无上架商品'**
+  String get noWorkshopProducts;
+
+  /// No description provided for @myCraftDust.
+  ///
+  /// In zh, this message translates to:
+  /// **'我的匠尘'**
+  String get myCraftDust;
+
+  /// No description provided for @avatarFrames.
+  ///
+  /// In zh, this message translates to:
+  /// **'头像框'**
+  String get avatarFrames;
+
+  /// No description provided for @badges.
+  ///
+  /// In zh, this message translates to:
+  /// **'徽章'**
+  String get badges;
+
+  /// No description provided for @owned.
+  ///
+  /// In zh, this message translates to:
+  /// **'已拥有'**
+  String get owned;
+
+  /// No description provided for @goEquip.
+  ///
+  /// In zh, this message translates to:
+  /// **'去佩戴'**
+  String get goEquip;
+
+  /// No description provided for @exchange.
+  ///
+  /// In zh, this message translates to:
+  /// **'兑换'**
+  String get exchange;
+
+  /// No description provided for @cancel.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消'**
+  String get cancel;
+
+  /// No description provided for @confirmExchange.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认兑换'**
+  String get confirmExchange;
+
+  /// No description provided for @exchangeWithCraftDust.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用 {amount} 匠尘兑换？'**
+  String exchangeWithCraftDust(int amount);
+
+  /// No description provided for @insufficientCraftDust.
+  ///
+  /// In zh, this message translates to:
+  /// **'匠尘不足'**
+  String get insufficientCraftDust;
+
+  /// No description provided for @earnCraftDustHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'完成每日任务可以获得更多匠尘。'**
+  String get earnCraftDustHint;
+
+  /// No description provided for @goToTasks.
+  ///
+  /// In zh, this message translates to:
+  /// **'去做任务'**
+  String get goToTasks;
+
+  /// No description provided for @signInToViewTasks.
+  ///
+  /// In zh, this message translates to:
+  /// **'登录后查看任务成就'**
+  String get signInToViewTasks;
+
+  /// No description provided for @dailyTasks.
+  ///
+  /// In zh, this message translates to:
+  /// **'每日任务'**
+  String get dailyTasks;
+
+  /// No description provided for @careerAchievements.
+  ///
+  /// In zh, this message translates to:
+  /// **'生涯成就'**
+  String get careerAchievements;
+
+  /// No description provided for @completedToday.
+  ///
+  /// In zh, this message translates to:
+  /// **'今日\n完成'**
+  String get completedToday;
+
+  /// No description provided for @loadFailedTapToRetry.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载失败，点击重试'**
+  String get loadFailedTapToRetry;
+
+  /// No description provided for @honorRewardNames.
+  ///
+  /// In zh, this message translates to:
+  /// **'徽章 · {names}'**
+  String honorRewardNames(String names);
+
+  /// No description provided for @listSeparator.
+  ///
+  /// In zh, this message translates to:
+  /// **'、'**
+  String get listSeparator;
+
+  /// No description provided for @unlocked.
+  ///
+  /// In zh, this message translates to:
+  /// **'已解锁'**
+  String get unlocked;
+
+  /// No description provided for @claimed.
+  ///
+  /// In zh, this message translates to:
+  /// **'已领取'**
+  String get claimed;
+
+  /// No description provided for @claim.
+  ///
+  /// In zh, this message translates to:
+  /// **'领取'**
+  String get claim;
+
+  /// No description provided for @checkIn.
+  ///
+  /// In zh, this message translates to:
+  /// **'签到'**
+  String get checkIn;
+
+  /// No description provided for @pending.
+  ///
+  /// In zh, this message translates to:
+  /// **'待完成'**
+  String get pending;
+
+  /// No description provided for @signInToViewHonors.
+  ///
+  /// In zh, this message translates to:
+  /// **'登录后查看头像徽章'**
+  String get signInToViewHonors;
+
+  /// No description provided for @operationFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'操作失败'**
+  String get operationFailed;
+
+  /// No description provided for @noAvatarFrames.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有获得头像框'**
+  String get noAvatarFrames;
+
+  /// No description provided for @noBadges.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有获得徽章'**
+  String get noBadges;
+
+  /// No description provided for @noAvatarFrameEquipped.
+  ///
+  /// In zh, this message translates to:
+  /// **'未佩戴头像框'**
+  String get noAvatarFrameEquipped;
+
+  /// No description provided for @myAvatarFrames.
+  ///
+  /// In zh, this message translates to:
+  /// **'我的头像框'**
+  String get myAvatarFrames;
+
+  /// No description provided for @myBadges.
+  ///
+  /// In zh, this message translates to:
+  /// **'我的徽章'**
+  String get myBadges;
+
+  /// No description provided for @cropAvatar.
+  ///
+  /// In zh, this message translates to:
+  /// **'裁剪头像'**
+  String get cropAvatar;
+
+  /// No description provided for @unsupportedAvatarFormat.
+  ///
+  /// In zh, this message translates to:
+  /// **'仅支持 JPG、JPEG、PNG、HEIC、HEIF 图片'**
+  String get unsupportedAvatarFormat;
+
+  /// No description provided for @avatarUpdated.
+  ///
+  /// In zh, this message translates to:
+  /// **'头像修改成功'**
+  String get avatarUpdated;
+
+  /// No description provided for @avatarUploadFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'头像上传失败，请稍后重试'**
+  String get avatarUploadFailed;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'群英荟萃，匠心者也'**
+  String get loginSubtitle;
+
+  /// No description provided for @githubLogin.
+  ///
+  /// In zh, this message translates to:
+  /// **'GitHub 登录'**
+  String get githubLogin;
+
+  /// No description provided for @authCodeInvalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证码错误，请重新输入'**
+  String get authCodeInvalid;
+
+  /// No description provided for @authCodeExpired.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证码已失效，请重新获取'**
+  String get authCodeExpired;
+
+  /// No description provided for @authCodeRateLimited.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证码发送过于频繁，请稍后再试'**
+  String get authCodeRateLimited;
+
+  /// No description provided for @authEmailInvalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'邮箱格式不正确，请检查后重试'**
+  String get authEmailInvalid;
+
+  /// No description provided for @authCredentialInvalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'账号或密码错误，请重新输入'**
+  String get authCredentialInvalid;
+
+  /// No description provided for @networkError.
+  ///
+  /// In zh, this message translates to:
+  /// **'网络连接异常，请检查网络后重试'**
+  String get networkError;
+
+  /// No description provided for @loginFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'登录失败，请稍后重试'**
+  String get loginFailed;
+
+  /// No description provided for @agreementUrlInvalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'协议地址配置异常'**
+  String get agreementUrlInvalid;
+
+  /// No description provided for @openPageFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂时无法打开该页面，请稍后重试'**
+  String get openPageFailed;
+
+  /// No description provided for @notSignedIn.
+  ///
+  /// In zh, this message translates to:
+  /// **'未登录'**
+  String get notSignedIn;
+
+  /// No description provided for @accountManagement.
+  ///
+  /// In zh, this message translates to:
+  /// **'账号管理'**
+  String get accountManagement;
+
+  /// No description provided for @craftId.
+  ///
+  /// In zh, this message translates to:
+  /// **'匠心 ID'**
+  String get craftId;
+
+  /// No description provided for @email.
+  ///
+  /// In zh, this message translates to:
+  /// **'邮箱'**
+  String get email;
+
+  /// No description provided for @bind.
+  ///
+  /// In zh, this message translates to:
+  /// **'去绑定'**
+  String get bind;
+
+  /// No description provided for @emailAlreadyBound.
+  ///
+  /// In zh, this message translates to:
+  /// **'该邮箱已被其他账号绑定'**
+  String get emailAlreadyBound;
+
+  /// No description provided for @emailBound.
+  ///
+  /// In zh, this message translates to:
+  /// **'邮箱绑定成功'**
+  String get emailBound;
+
+  /// No description provided for @passwordChangeFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'密码修改失败'**
+  String get passwordChangeFailed;
+
+  /// No description provided for @passwordChanged.
+  ///
+  /// In zh, this message translates to:
+  /// **'密码修改成功'**
+  String get passwordChanged;
+
+  /// No description provided for @passwordReset.
+  ///
+  /// In zh, this message translates to:
+  /// **'密码重置成功'**
+  String get passwordReset;
+
+  /// No description provided for @copied.
+  ///
+  /// In zh, this message translates to:
+  /// **'已复制'**
+  String get copied;
+
+  /// No description provided for @accountDeleted.
+  ///
+  /// In zh, this message translates to:
+  /// **'账号已注销'**
+  String get accountDeleted;
+
+  /// No description provided for @accountDeleteFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'账号注销失败，请稍后重试'**
+  String get accountDeleteFailed;
+
+  /// No description provided for @logout.
+  ///
+  /// In zh, this message translates to:
+  /// **'退出登录'**
+  String get logout;
+
+  /// No description provided for @logoutConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要退出当前账号吗？'**
+  String get logoutConfirm;
+
+  /// No description provided for @editUsername.
+  ///
+  /// In zh, this message translates to:
+  /// **'修改用户名'**
+  String get editUsername;
+
+  /// No description provided for @save.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存'**
+  String get save;
+
+  /// No description provided for @usernameHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入用户名'**
+  String get usernameHint;
+
+  /// No description provided for @usernameLimit.
+  ///
+  /// In zh, this message translates to:
+  /// **'用户名最多 50 个字符'**
+  String get usernameLimit;
+
+  /// No description provided for @nicknameRequired.
+  ///
+  /// In zh, this message translates to:
+  /// **'昵称不能为空'**
+  String get nicknameRequired;
+
+  /// No description provided for @nicknameUpdated.
+  ///
+  /// In zh, this message translates to:
+  /// **'昵称修改成功'**
+  String get nicknameUpdated;
+
+  /// No description provided for @nicknameUpdateFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'昵称修改失败，请稍后重试'**
+  String get nicknameUpdateFailed;
+
+  /// No description provided for @editSignature.
+  ///
+  /// In zh, this message translates to:
+  /// **'修改个性签名'**
+  String get editSignature;
+
+  /// No description provided for @signatureHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入个性签名'**
+  String get signatureHint;
+
+  /// No description provided for @signatureLimit.
+  ///
+  /// In zh, this message translates to:
+  /// **'个性签名最多 100 个字符'**
+  String get signatureLimit;
+
+  /// No description provided for @signatureUpdated.
+  ///
+  /// In zh, this message translates to:
+  /// **'签名修改成功'**
+  String get signatureUpdated;
+
+  /// No description provided for @signatureUpdateFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'签名修改失败，请稍后重试'**
+  String get signatureUpdateFailed;
+
+  /// No description provided for @skinTooLarge.
+  ///
+  /// In zh, this message translates to:
+  /// **'皮肤图片不能超过 10 MB'**
+  String get skinTooLarge;
+
+  /// No description provided for @imageReadFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法读取所选图片'**
+  String get imageReadFailed;
+
+  /// No description provided for @skinUpdated.
+  ///
+  /// In zh, this message translates to:
+  /// **'{mode}皮肤已更新'**
+  String skinUpdated(String mode);
+
+  /// No description provided for @skinUpdateFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'皮肤图片设置失败'**
+  String get skinUpdateFailed;
+
+  /// No description provided for @light.
+  ///
+  /// In zh, this message translates to:
+  /// **'亮色'**
+  String get light;
+
+  /// No description provided for @dark.
+  ///
+  /// In zh, this message translates to:
+  /// **'暗色'**
+  String get dark;
+
+  /// No description provided for @noBio.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂未填写个人简介'**
+  String get noBio;
+
+  /// No description provided for @loginOrRegister.
+  ///
+  /// In zh, this message translates to:
+  /// **'登录/注册'**
+  String get loginOrRegister;
+
+  /// No description provided for @loginSyncHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'登录后同步收藏与个人资料'**
+  String get loginSyncHint;
+
+  /// No description provided for @userUnblocked.
+  ///
+  /// In zh, this message translates to:
+  /// **'已解除对 {name} 的拉黑'**
+  String userUnblocked(String name);
+
+  /// No description provided for @reload.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新加载'**
+  String get reload;
+
+  /// No description provided for @noBlockedUsers.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无拉黑用户'**
+  String get noBlockedUsers;
+
+  /// No description provided for @userHasNoBio.
+  ///
+  /// In zh, this message translates to:
+  /// **'该用户暂无简介'**
+  String get userHasNoBio;
+
+  /// No description provided for @unblock.
+  ///
+  /// In zh, this message translates to:
+  /// **'解除拉黑'**
+  String get unblock;
+
+  /// No description provided for @supportPrompt.
+  ///
+  /// In zh, this message translates to:
+  /// **'开源不易，请我喝咖啡~'**
+  String get supportPrompt;
+
+  /// No description provided for @alipay.
+  ///
+  /// In zh, this message translates to:
+  /// **'支付宝'**
+  String get alipay;
+
+  /// No description provided for @wechatOne.
+  ///
+  /// In zh, this message translates to:
+  /// **'微信 1'**
+  String get wechatOne;
+
+  /// No description provided for @wechatTwo.
+  ///
+  /// In zh, this message translates to:
+  /// **'微信 2'**
+  String get wechatTwo;
 
   /// No description provided for @aboutApplications.
   ///
@@ -977,12 +1568,6 @@ abstract class AppLocalizations {
   /// **'布局宝库'**
   String get knowledgeTabLayout;
 
-  /// No description provided for @knowledgeTabPoint.
-  ///
-  /// In zh, this message translates to:
-  /// **'要点宝库'**
-  String get knowledgeTabPoint;
-
   /// No description provided for @knowledgeConstruction.
   ///
   /// In zh, this message translates to:
@@ -1206,7 +1791,8 @@ abstract class AppLocalizations {
   String get slogan;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1215,25 +1801,25 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return AppLocalizationsEn();
-    case 'zh': return AppLocalizationsZh();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(
-    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

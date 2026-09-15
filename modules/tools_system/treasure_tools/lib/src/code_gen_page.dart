@@ -1,215 +1,111 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 
-import 'class_generator.dart';
-import 'desk_widget_top_bar.dart';
-import 'icon_font_gen/icon_font_gen_page.dart';
-import 'model/class.dart';
-import 'model/field.dart';
-import 'popable/class_gen_field.dart';
-import 'popable/toly_select.dart';
-import 'view/json_display/json_display.dart';
-import 'view/text_codec/text_codec_tool.dart';
+import 'toolbox/catalog.dart';
+import 'toolbox/desktop_theme.dart';
+import 'toolbox/header.dart';
+import 'toolbox/sidebar.dart';
 
-class A {}
-
+/// 桌面端开发工具工作台。
 class CodeGenPage extends StatefulWidget {
-  const CodeGenPage({Key? key}) : super(key: key);
+  /// 创建工具工作台页面。
+  const CodeGenPage({super.key});
 
   @override
   State<CodeGenPage> createState() => _CodeGenPageState();
 }
 
 class _CodeGenPageState extends State<CodeGenPage> {
-  TextEditingController _dirPath = TextEditingController();
-  final PageController _ctrl = PageController();
-  int selectIndex = 0;
+  /// 当前打开的工具。
+  DeveloperTool _selectedTool = DeveloperTool.jwtDebugger;
 
-  final List<String> selectData = [
-    "final",
-    "static",
-    'static const',
-  ];
+  /// 按打开顺序排列的桌面工具标签。
+  final List<DeveloperTool> _openTools = [DeveloperTool.jwtDebugger];
 
-  Class clazz1 = Class(
-    name: '',
-    fields: [],
-  );
+  /// 当前会话收藏的工具。
+  final Set<DeveloperTool> _favoriteTools = {
+    DeveloperTool.jwtDebugger,
+    DeveloperTool.jsonParser,
+    DeveloperTool.urlCodec,
+  };
 
-  @override
-  void initState() {
-    super.initState();
+  /// 打开或激活工具对应的桌面标签。
+  void _selectTool(DeveloperTool tool) {
+    setState(() {
+      if (!_openTools.contains(tool)) {
+        _openTools.add(tool);
+      }
+      _selectedTool = tool;
+    });
+  }
+
+  /// 关闭指定标签，并在必要时激活相邻工具。
+  void _closeTool(DeveloperTool tool) {
+    if (_openTools.length == 1) {
+      return;
+    }
+    setState(() {
+      final int closingIndex = _openTools.indexOf(tool);
+      _openTools.remove(tool);
+      if (_selectedTool == tool) {
+        final int nextIndex =
+            closingIndex.clamp(0, _openTools.length - 1).toInt();
+        _selectedTool = _openTools[nextIndex];
+      }
+    });
+  }
+
+  void _toggleFavorite(DeveloperTool tool) {
+    setState(() {
+      if (!_favoriteTools.remove(tool)) {
+        _favoriteTools.add(tool);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          DeskCodeGenTopBar(
-            onTapGen: _doGen,
-            onTabPressed: (int value) {
-              _ctrl.jumpToPage(value);
-            },
-          ),
-          Expanded(
-              child: PageView(
-            controller: _ctrl,
-            children: [
-              const JsonAnalysisTool(),
-              const Base64CodecTool(),
-              const UrlCodecTool(),
-              const IconFontGenPage(),
-            ],
-          )),
-          if (false)
-            Padding(
-              padding: const EdgeInsets.only(left: 20, top: 20),
-              child: Row(
+    return Theme(
+      data: buildToolboxDesktopTheme(context),
+      child: Scaffold(
+        body: Row(
+          children: <Widget>[
+            ToolLibrarySidebar(
+              selectedTool: _selectedTool,
+              favoriteTools: _favoriteTools,
+              onSelected: _selectTool,
+              onFavoriteChanged: _toggleFavorite,
+            ),
+            VerticalDivider(
+              width: 1,
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+            Expanded(
+              child: Column(
                 children: [
-                  GestureDetector(
-                      onTap: () async {
-                        // final String? directoryPath = await getDirectoryPath();
-                        // if (directoryPath != null) {
-                        //   print("====$directoryPath=========");
-                        //   _dirPath.text = directoryPath;
-                        // }
-                      },
-                      child: Icon(Icons.file_copy_outlined)),
-                  SizedBox(
-                    width: 20,
+                  ToolboxHeader(
+                    tools: _openTools,
+                    selectedTool: _selectedTool,
+                    onSelected: _selectTool,
+                    onClosed: _closeTool,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: Theme.of(context).colorScheme.outlineVariant,
                   ),
                   Expanded(
-                      child: TextField(
-                    controller: _dirPath,
-                  )),
-                  SizedBox(
-                    width: 20,
+                    child: IndexedStack(
+                      index: DeveloperTool.values.indexOf(_selectedTool),
+                      children: DeveloperTool.values
+                          .map((DeveloperTool tool) => tool.buildView())
+                          .toList(growable: false),
+                    ),
                   ),
                 ],
               ),
             ),
-          if (false)
-            Expanded(
-                child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: ClassGenField(
-                clazz: clazz1,
-              ),
-            ))
-        ],
+          ],
+        ),
       ),
-    );
-  }
-
-  void _onChange(int index) {
-    selectIndex = index;
-    setState(() {});
-  }
-
-  void _doGen() {
-    // String className = _classNameCtrl.text;
-    // String fieldType = _fieldTypeCtrl.text;
-    // String fieldName = _fieldNameCtrl.text;
-    // String modifier = selectData[selectIndex];
-    //
-    // print(
-    //     "===$className===$fieldType====$fieldName=======$modifier===================");
-    // Class clazz = Class(
-    //   name: className,
-    //   fields: [
-    //     // Field(name: 'cost', type: int),
-    //     // Field(name: 'taskName', type: String),
-    //     // Field(name: 'count', type: int),
-    //     // Field(name: 'taskCode', type: String),
-    //     Field(
-    //         name: fieldName,
-    //         type: fieldType,
-    //         nullable: true,
-    //         isRequired: false),
-    //   ],
-    // );
-    print(clazz1.buildClass());
-    if (_dirPath.text.isNotEmpty) {
-      clazz1.write2File(Directory(_dirPath.text));
-    }
-  }
-}
-
-class GenInput extends StatelessWidget {
-  final String hintText;
-  final String label;
-  final TextEditingController? controller;
-
-  const GenInput(
-      {Key? key, required this.hintText, this.controller, required this.label})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      direction: Axis.vertical,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(6.0),
-          child: Text(
-            label,
-            style: TextStyle(fontSize: 12),
-          ),
-        ),
-        SizedBox(
-          width: 150,
-          height: 30,
-          child: TextField(
-            controller: controller,
-            style: TextStyle(fontSize: 14),
-            decoration: InputDecoration(
-                filled: true,
-                hoverColor: Colors.transparent,
-                contentPadding: EdgeInsets.only(top: 0, left: 15),
-                fillColor: Color(0xffF1F2F3),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                  borderRadius: BorderRadius.all(Radius.circular(6)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: BorderRadius.all(Radius.circular(6)),
-                ),
-                hintText: hintText,
-                hintStyle: TextStyle(fontSize: 12, color: Colors.grey)),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class GenCheckBox extends StatelessWidget {
-  final String label;
-  final bool checked;
-  final ValueChanged<bool?>? onChanged;
-
-  const GenCheckBox({
-    Key? key,
-    required this.label,
-    required this.checked,
-    this.onChanged,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      direction: Axis.vertical,
-      children: [
-        Checkbox(value: checked, onChanged: onChanged),
-        Text(
-          label,
-          style: TextStyle(fontSize: 12),
-        ),
-      ],
     );
   }
 }

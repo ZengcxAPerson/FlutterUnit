@@ -9,7 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_unit/src/navigation/model/app_tab.dart';
 import 'package:fx_updater/fx_updater.dart';
+import 'package:fx_user_session/fx_user_session.dart';
 import 'package:pkg_player/pkg_player.dart';
+import 'package:treasure_tools/treasure_tools.dart';
+import 'package:unit_env/unit_env.dart';
 import 'package:widget_module/widget_module.dart';
 import 'news.dart';
 import 'pure_bottom_bar.dart';
@@ -37,9 +40,11 @@ class _UnitPhoneNavigationState extends State<UnitPhoneNavigation> {
   void initState() {
     super.initState();
     if (Platform.isAndroid || Platform.isIOS) {}
-    String locale =
-        context.read<AppConfigBloc>().state.language.locale.toString();
-    context.read<UpgradeBloc>().add(CheckUpdate(appId: 1, locale: locale));
+    if (UnitEnv.supportsInAppUpdate) {
+      final String locale =
+          context.read<AppConfigBloc>().state.language.locale.toString();
+      context.read<UpgradeBloc>().add(CheckUpdate(appId: 1, locale: locale));
+    }
   }
 
   @override
@@ -49,20 +54,37 @@ class _UnitPhoneNavigationState extends State<UnitPhoneNavigation> {
     super.dispose();
   }
 
-  /// extendBody = true 凹嵌透明，需要处理底部 边距
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
       endDrawer: const HomeRightDrawer(),
       body: PageView(
         physics: _neverScroll,
         controller: _controller,
         children: [
-          StandardHomePage(heard: NewsHeader()),
-          GalleryUnit(),
-          AlgoScope(child: ArtifactPage()),
-          PkgPlayerPage(),
+          StandardHomePage(
+            heard: const NewsHeader(),
+            avatar: const SessionUserAvatar(size: 32),
+            onAvatarPointerDown: () => debugPrint(
+              '[FlutterUnit.AuthEntry] home.avatar.pointerDown',
+            ),
+            onAvatarTap: () => _openAccountEntry(context),
+          ),
+          BlocBuilder<FxUserSessionCubit, FxUserSession>(
+            builder: (BuildContext context, FxUserSession session) =>
+                PkgPlayerPage(
+              config: PkgPlayerConfig(
+                isAuthenticated: session is FxAuthed,
+                onLoginRequired: _openPackageLogin,
+              ),
+            ),
+          ),
+          AlgoScope(
+            child: ArtifactPage(
+              drawingPage: const GalleryUnit(embedded: true),
+            ),
+          ),
+          const MobileToolPage(),
           UserPage(),
         ],
       ),
@@ -83,7 +105,8 @@ class _UnitPhoneNavigationState extends State<UnitPhoneNavigation> {
                   onTap: _onTapBottomNav,
                   activeTab: value,
                 )),
-        const Positioned(right: 22, top: 8, child: UpdateRedPoint())
+        if (UnitEnv.supportsInAppUpdate)
+          const Positioned(right: 22, top: 8, child: UpdateRedPoint()),
       ],
     );
   }
@@ -91,9 +114,25 @@ class _UnitPhoneNavigationState extends State<UnitPhoneNavigation> {
   // 点击底部按钮事件，切换页面
   void _onTapBottomNav(int index) {
     _controller.jumpToPage(index);
-    _activeTab.value = AppTab.values[index];
-    if (index == 3) {
+    final AppTab selectedTab = AppTab.mobileTabs[index];
+    _activeTab.value = selectedTab;
+    if (selectedTab == AppTab.packages) {
       context.read<LikeWidgetBloc>().loadLikeData();
     }
+  }
+
+  void _openAccountEntry(BuildContext context) {
+    final FxUserSession state = context.read<FxUserSessionCubit>().state;
+    final String target =
+        state is FxAuthed ? AppRoute.honors.url : AppRoute.login.url;
+    debugPrint(
+      '[FlutterUnit.AuthEntry] home.avatar.tap '
+      'state=${state.runtimeType} target=$target',
+    );
+    context.push(target);
+  }
+
+  Future<void> _openPackageLogin(BuildContext context) {
+    return context.push<void>(AppRoute.login.url);
   }
 }

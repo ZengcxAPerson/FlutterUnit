@@ -3,8 +3,12 @@ import 'package:fx_dio/fx_dio.dart';
 import 'package:fx_updater/fx_updater.dart';
 
 void main() async {
-  FxDio()
-      .register(const ScienceHost(), repInterceptor: ScienceRepInterceptor());
+  FxDio().register(
+    const FlutterUnitHost(),
+    options: HostOptions(
+      repInterceptor: FlutterUnitResponseInterceptor(),
+    ),
+  );
 
   UpgradeApi api = UnitUpgradeApi();
   ApiRet<AppInfo> info = await api.fetch(1, 'zh');

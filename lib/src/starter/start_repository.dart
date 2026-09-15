@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:note/note.dart';
 import 'package:app/app.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fx_boot_starter/fx_boot_starter.dart';
 import 'package:flutter/services.dart';
@@ -11,7 +10,6 @@ import 'package:pkg_player/pkg_player.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:storage/storage.dart';
 import 'package:path/path.dart' as path;
-import 'package:utils/utils.dart';
 import 'package:path/path.dart' as p;
 import 'bridge/unit_bridge.dart';
 import 'package:widget_module/widget_module.dart';
@@ -24,20 +22,16 @@ class FlutterUnitStartRepo implements AppStartRepository<AppConfig> {
   @override
   Future<AppConfig> initApp() async {
     WidgetsFlutterBinding.ensureInitialized();
-    // 滚动性能优化 1.22.0
-    GestureBinding.instance.resamplingEnabled = true;
     WindowSizeAdapter.setSize();
     await SpStorage().initSp();
     await initAppMeta();
     AppConfigPo po = await SpStorage().appConfig.read();
 
     AppConfig state = AppConfig.fromPo(po);
-    registerHttpClient(state.language.isZh);
+    configureFlutterUnitHttp(state.language.isZh);
     NoteEnv().attachBridge(UnitNoteBridge());
     if (!kAppEnv.isWeb) await initDb();
     await initWidgetStatistics(); // 加载统计数据
-
-    HttpUtil.instance.rebase(PathUnit.baseUrl);
 
     return state;
   }

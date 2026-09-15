@@ -15,8 +15,8 @@ class UnitApiAuth extends ApiAuth {
 
 void main() {
   runApp(const MyApp());
-  FxDio().register(Unit3Host());
-  FxDio().auth<Unit3Host>(UnitApiAuth());
+  FxDio().register(const FlutterUnitHost());
+  FxDio().auth<FlutterUnitHost>(UnitApiAuth());
 }
 
 class MyApp extends StatelessWidget {
@@ -29,7 +29,12 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: lightTheme(),
-      home: PkgPlayerPage(),
+      home: PkgPlayerPage(
+        config: PkgPlayerConfig(
+          isAuthenticated: false,
+          onLoginRequired: (BuildContext context) async {},
+        ),
+      ),
     );
   }
 }

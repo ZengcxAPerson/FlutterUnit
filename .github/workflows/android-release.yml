@@ -1,0 +1,289 @@
+name: Android Build Core
+
+on:
+  workflow_call:
+    inputs:
+      flavor:
+        required: true
+        type: string
+      display_name:
+        required: true
+        type: string
+      artifact_suffix:
+        required: true
+        type: string
+      publish_to_release:
+        required: true
+        type: boolean
+      upload_to_google_play:
+        required: true
+        type: boolean
+    secrets:
+      UNITX_CLIENT_ENV:
+        required: true
+      UNITX_ANDROID_SIGNING:
+        required: true
+      UNITX_GOOGLE_PLAY_DISTRIBUTION:
+        required: false
+
+jobs:
+  build-channel:
+    name: Build ${{ inputs.display_name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v5
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          # fx_install_plugin 2.1.0 的 Android 模块以 Java 21 为编译目标。
+          java-version: "21"
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.0
+          channel: stable
+          cache: true
+
+      - name: Verify build environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter doctor -v
+          java -version
+
+      - name: Install Android 16 SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          android_sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          [[ -n "$android_sdk_root" ]] || { echo "ANDROID_SDK_ROOT or ANDROID_HOME is required." >&2; exit 1; }
+
+          sdkmanager_path="$android_sdk_root/cmdline-tools/latest/bin/sdkmanager"
+          if [[ ! -x "$sdkmanager_path" ]]; then
+            sdkmanager_path="$(find "$android_sdk_root/cmdline-tools" -path '*/bin/sdkmanager' -type f -perm -u+x 2>/dev/null | sort -V | tail -n 1 || true)"
+          fi
+          [[ -x "$sdkmanager_path" ]] || { echo "sdkmanager was not found under $android_sdk_root." >&2; exit 1; }
+
+          "$sdkmanager_path" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Create release environment
+        shell: bash
+        env:
+          UNITX_CLIENT_ENV: ${{ secrets.UNITX_CLIENT_ENV }}
+        run: |
+          set -euo pipefail
+          [[ -n "$UNITX_CLIENT_ENV" ]] || { echo "GitHub Secret UNITX_CLIENT_ENV is required." >&2; exit 1; }
+          client_bundle="$RUNNER_TEMP/unitx-client.env"
+          printf '%s\n' "$UNITX_CLIENT_ENV" > "$client_bundle"
+          source "$client_bundle"
+          [[ -n "${CLIENT_ENV_BASE64:-}" ]] || { echo "UNITX_CLIENT_ENV is invalid." >&2; exit 1; }
+          environment_directory="$GITHUB_WORKSPACE/../.fx/.env"
+          environment_file="$environment_directory/.client.release"
+          mkdir -p "$environment_directory"
+          printf '%s' "$CLIENT_ENV_BASE64" | base64 --decode > "$environment_file"
+          chmod 600 "$environment_file"
+          echo "release_env_path=$environment_file" >> "$GITHUB_ENV"
+
+      - name: Create Android signing files
+        shell: bash
+        env:
+          UNITX_ANDROID_SIGNING: ${{ secrets.UNITX_ANDROID_SIGNING }}
+        run: |
+          set -euo pipefail
+          [[ -n "$UNITX_ANDROID_SIGNING" ]] || { echo "GitHub Secret UNITX_ANDROID_SIGNING is required." >&2; exit 1; }
+          signing_bundle="$RUNNER_TEMP/unitx-android.env"
+          printf '%s\n' "$UNITX_ANDROID_SIGNING" > "$signing_bundle"
+          source "$signing_bundle"
+          for key in KEYSTORE_BASE64 STORE_PASSWORD_BASE64 KEY_ALIAS_BASE64 KEY_PASSWORD_BASE64; do
+            [[ -n "${!key:-}" ]] || { echo "UNITX_ANDROID_SIGNING is missing $key." >&2; exit 1; }
+          done
+          STORE_PASSWORD="$(printf '%s' "$STORE_PASSWORD_BASE64" | base64 --decode)"
+          KEY_ALIAS="$(printf '%s' "$KEY_ALIAS_BASE64" | base64 --decode)"
+          KEY_PASSWORD="$(printf '%s' "$KEY_PASSWORD_BASE64" | base64 --decode)"
+          echo "::add-mask::$STORE_PASSWORD"
+          echo "::add-mask::$KEY_PASSWORD"
+
+          keystore_path="$GITHUB_WORKSPACE/android/toly.jks"
+          properties_path="$GITHUB_WORKSPACE/android/key.properties"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
+          chmod 600 "$keystore_path"
+          {
+            printf 'storePassword=%s\n' "$STORE_PASSWORD"
+            printf 'keyPassword=%s\n' "$KEY_PASSWORD"
+            printf 'keyAlias=%s\n' "$KEY_ALIAS"
+            printf 'storeFile=../toly.jks\n'
+          } > "$properties_path"
+          chmod 600 "$properties_path"
+          keytool -list -keystore "$keystore_path" -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" >/dev/null
+          echo "android_keystore_path=$keystore_path" >> "$GITHUB_ENV"
+          echo "android_properties_path=$properties_path" >> "$GITHUB_ENV"
+
+      - name: Validate release metadata
+        id: metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(sed -nE 's/^version:[[:space:]]*([^[:space:]]+).*/\1/p' pubspec.yaml | head -n 1)"
+          if [[ -z "$version" ]]; then
+            echo "Unable to read version from pubspec.yaml." >&2
+            exit 1
+          fi
+          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo "Tag $GITHUB_REF_NAME does not match pubspec version v$version." >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "artifact_name=FlutterUnit-$version" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter clean
+          flutter pub get
+
+      - name: Build China APK
+        if: inputs.flavor == 'china'
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build apk \
+            --release \
+            --flavor=china \
+            --target-platform=android-arm64 \
+            --split-per-abi \
+            --obfuscate \
+            --split-debug-info="build/android-symbols/china/${{ steps.metadata.outputs.version }}" \
+            --dart-define-from-file="$release_env_path" \
+            --dart-define=APP_FLAVOR=china
+
+      - name: Build Google AAB
+        if: inputs.flavor == 'google'
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build appbundle \
+            --release \
+            --flavor=google \
+            --obfuscate \
+            --split-debug-info="build/android-symbols/google/${{ steps.metadata.outputs.version }}" \
+            --dart-define-from-file="$release_env_path" \
+            --dart-define=APP_FLAVOR=google
+
+      - name: Package and verify artifact
+        id: package
+        shell: bash
+        env:
+          FLAVOR: ${{ inputs.flavor }}
+        run: |
+          set -euo pipefail
+          output_directory="$GITHUB_WORKSPACE/build/distribution/android"
+          mkdir -p "$output_directory"
+
+          if [[ "$FLAVOR" == "china" ]]; then
+            source_path="$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-arm64-v8a-china-release.apk"
+            output_path="$output_directory/${{ steps.metadata.outputs.artifact_name }}.apk"
+            test -f "$source_path"
+            cp "$source_path" "$output_path"
+            build_tools_directory="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
+            "$build_tools_directory/apksigner" verify --verbose --print-certs "$output_path"
+          else
+            source_path="$GITHUB_WORKSPACE/build/app/outputs/bundle/googleRelease/app-google-release.aab"
+            output_path="$output_directory/${{ steps.metadata.outputs.artifact_name }}-google.aab"
+            test -f "$source_path"
+            cp "$source_path" "$output_path"
+            # Android 发布证书通常是自签名证书；校验包内签名完整性，不要求公共 CA 信任链。
+            jarsigner -verify -certs "$output_path"
+            manifest_path="$GITHUB_WORKSPACE/build/app/intermediates/packaged_manifests/googleRelease/processGoogleReleaseManifestForPackage/AndroidManifest.xml"
+            test -f "$manifest_path"
+            if ! grep -Eq 'android:targetSdkVersion="36"' "$manifest_path"; then
+              echo "Google AAB source manifest must target Android API 36." >&2
+              exit 1
+            fi
+          fi
+
+          echo "package_path=$output_path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload channel package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.metadata.outputs.artifact_name }}-${{ inputs.artifact_suffix }}
+          path: ${{ steps.package.outputs.package_path }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload channel symbols
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.metadata.outputs.artifact_name }}-${{ inputs.artifact_suffix }}-symbols
+          path: build/android-symbols/${{ inputs.flavor }}/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Prepare Google Play credentials
+        if: inputs.flavor == 'google' && inputs.upload_to_google_play
+        shell: bash
+        env:
+          UNITX_GOOGLE_PLAY_DISTRIBUTION: ${{ secrets.UNITX_GOOGLE_PLAY_DISTRIBUTION }}
+        run: |
+          set -euo pipefail
+          [[ -n "$UNITX_GOOGLE_PLAY_DISTRIBUTION" ]] || { echo "GitHub Secret UNITX_GOOGLE_PLAY_DISTRIBUTION is required." >&2; exit 1; }
+          google_bundle="$RUNNER_TEMP/unitx-google-play.env"
+          printf '%s\n' "$UNITX_GOOGLE_PLAY_DISTRIBUTION" > "$google_bundle"
+          source "$google_bundle"
+          for key in SERVICE_ACCOUNT_JSON_BASE64 PACKAGE_NAME_BASE64 TRACK_BASE64; do
+            [[ -n "${!key:-}" ]] || { echo "UNITX_GOOGLE_PLAY_DISTRIBUTION is missing $key." >&2; exit 1; }
+          done
+
+          credentials_path="$RUNNER_TEMP/google-play-service-account.json"
+          package_name="$(printf '%s' "$PACKAGE_NAME_BASE64" | base64 --decode)"
+          track="$(printf '%s' "$TRACK_BASE64" | base64 --decode)"
+          printf '%s' "$SERVICE_ACCOUNT_JSON_BASE64" | base64 --decode > "$credentials_path"
+          chmod 600 "$credentials_path"
+          jq -e '.type == "service_account" and (.private_key | contains("BEGIN PRIVATE KEY"))' "$credentials_path" >/dev/null
+          [[ "$package_name" == "com.toly1994.flutterunit" ]] || { echo "Unexpected Google Play package: $package_name" >&2; exit 1; }
+          [[ "$track" == "production" ]] || { echo "Unexpected Google Play track: $track" >&2; exit 1; }
+          {
+            echo "google_play_credentials_path=$credentials_path"
+            echo "google_play_package_name=$package_name"
+            echo "google_play_track=$track"
+          } >> "$GITHUB_ENV"
+
+      - name: Upload Google AAB and submit for review
+        if: inputs.flavor == 'google' && inputs.upload_to_google_play
+        uses: r0adkll/upload-google-play@v1.1.5
+        with:
+          serviceAccountJson: ${{ env.google_play_credentials_path }}
+          packageName: ${{ env.google_play_package_name }}
+          releaseFiles: ${{ steps.package.outputs.package_path }}
+          tracks: ${{ env.google_play_track }}
+          releaseName: ${{ steps.metadata.outputs.version }}
+          status: completed
+          changesNotSentForReview: false
+
+      - name: Publish China APK to GitHub release
+        if: inputs.publish_to_release && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: ${{ steps.package.outputs.package_path }}
+
+      - name: Remove temporary signing materials
+        if: always()
+        shell: bash
+        run: |
+          rm -f \
+            "${android_keystore_path:-}" \
+            "${android_properties_path:-}" \
+            "${release_env_path:-}" \
+            "$RUNNER_TEMP/unitx-client.env" \
+            "$RUNNER_TEMP/unitx-android.env" \
+            "$RUNNER_TEMP/unitx-google-play.env" \
+            "${google_play_credentials_path:-}"

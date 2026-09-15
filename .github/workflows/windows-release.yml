@@ -1,0 +1,170 @@
+name: Build Windows Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows x64
+    # 固定 VS 2022，避免 windows-latest 升级到 MSVC 14.51 后，
+    # permission_handler_windows 的 experimental/coroutine 兼容性构建失败。
+    runs-on: windows-2022
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.0
+          channel: stable
+          cache: true
+
+      - name: Verify Flutter environment
+        shell: pwsh
+        run: flutter doctor -v
+
+      - name: Create release environment
+        shell: pwsh
+        env:
+          UNITX_CLIENT_ENV: ${{ secrets.UNITX_CLIENT_ENV }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:UNITX_CLIENT_ENV)) {
+            throw "GitHub Secret UNITX_CLIENT_ENV is required."
+          }
+          $entry = $env:UNITX_CLIENT_ENV -split "`n" | Where-Object { $_ -like "CLIENT_ENV_BASE64=*" } | Select-Object -First 1
+          if ([string]::IsNullOrWhiteSpace($entry)) { throw "UNITX_CLIENT_ENV is invalid." }
+          $encodedEnvironment = $entry.Substring("CLIENT_ENV_BASE64=".Length).Trim()
+          $environmentContent = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($encodedEnvironment))
+
+          $environmentDirectory = Join-Path $env:GITHUB_WORKSPACE "..\.fx\.env"
+          $environmentFile = Join-Path $environmentDirectory ".client.release"
+          New-Item -ItemType Directory -Force -Path $environmentDirectory | Out-Null
+          [System.IO.File]::WriteAllText(
+            $environmentFile,
+            $environmentContent,
+            [System.Text.UTF8Encoding]::new($false)
+          )
+
+      - name: Resolve dependencies
+        shell: pwsh
+        run: |
+          flutter clean
+          flutter config --enable-windows-desktop
+          flutter pub get
+
+      - name: Build Windows release
+        shell: pwsh
+        run: |
+          $environmentFile = Join-Path $env:GITHUB_WORKSPACE "..\.fx\.env\.client.release"
+          $debugInfoDirectory = Join-Path $env:GITHUB_WORKSPACE "build\windows-symbols"
+          flutter build windows `
+            --release `
+            --obfuscate `
+            --split-debug-info="$debugInfoDirectory" `
+            --dart-define-from-file="$environmentFile"
+
+      - name: Read release metadata
+        id: package
+        shell: pwsh
+        run: |
+          $versionLine = Select-String -Path "pubspec.yaml" -Pattern "^version:\s*(.+)$"
+          if ($null -eq $versionLine) {
+            throw "Unable to read version from pubspec.yaml."
+          }
+
+          $version = $versionLine.Matches[0].Groups[1].Value.Trim()
+          if ($env:GITHUB_REF_TYPE -eq "tag") {
+            $expectedTag = "v$version"
+            if ($env:GITHUB_REF_NAME -ne $expectedTag) {
+              throw "Tag $env:GITHUB_REF_NAME does not match pubspec version $expectedTag."
+            }
+          }
+
+          $artifactBaseName = "FlutterUnit-$version"
+          $releaseDirectory = Join-Path $env:GITHUB_WORKSPACE "build\windows\x64\runner\Release"
+          if (-not (Test-Path $releaseDirectory)) {
+            throw "Windows release directory was not generated: $releaseDirectory"
+          }
+
+          "artifact_name=$artifactBaseName" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup --no-progress --yes
+          }
+          if (-not (Test-Path $iscc)) {
+            throw "Inno Setup compiler was not installed: $iscc"
+          }
+
+          $translationDirectory = Join-Path `
+            $env:GITHUB_WORKSPACE `
+            "windows\installer\languages"
+          $translationFile = Join-Path `
+            $translationDirectory `
+            "ChineseSimplified.isl"
+          $translationUrl = `
+            "https://raw.githubusercontent.com/kira-96/Inno-Setup-Chinese-Simplified-Translation/1ff90acc4ed4aee82b1cda43253243deee3daed4/ChineseSimplified.isl"
+          New-Item `
+            -ItemType Directory `
+            -Force `
+            -Path $translationDirectory | Out-Null
+          Invoke-WebRequest -Uri $translationUrl -OutFile $translationFile
+          if (-not (Test-Path $translationFile)) {
+            throw "Chinese Inno Setup translation was not downloaded."
+          }
+
+      - name: Build Windows installer
+        id: installer
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          & $iscc `
+            "/DVersion=${{ steps.package.outputs.version }}" `
+            "windows\installer\flutter_unit.iss"
+          if ($LASTEXITCODE -ne 0) {
+            throw "Inno Setup compilation failed with exit code $LASTEXITCODE."
+          }
+
+          $installer = Join-Path `
+            $env:GITHUB_WORKSPACE `
+            "build\windows\installer\${{ steps.package.outputs.artifact_name }}.exe"
+          if (-not (Test-Path $installer)) {
+            throw "Windows installer was not generated: $installer"
+          }
+          "installer_path=$installer" >> $env:GITHUB_OUTPUT
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.artifact_name }}
+          path: ${{ steps.installer.outputs.installer_path }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload obfuscation symbols
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.artifact_name }}-symbols
+          path: build/windows-symbols/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: ${{ steps.installer.outputs.installer_path }}

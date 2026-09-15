@@ -1,3 +1,5 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -32,6 +34,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get messageBoard => 'Message Board';
+
+  @override
+  String get blacklist => 'Blocked Users';
 
   @override
   String get homeAccountTabMe => 'Contact Me';
@@ -85,6 +90,306 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userCollection => 'Collection';
 
   @override
+  String get avatarAchievements => 'Avatar & Badges';
+
+  @override
+  String get taskAchievements => 'Tasks & Achievements';
+
+  @override
+  String get workshop => 'Craft Workshop';
+
+  @override
+  String get exchangeHistory => 'Exchange History';
+
+  @override
+  String get noExchangeHistory => 'No exchanges yet';
+
+  @override
+  String get noWorkshopProducts => 'No products available';
+
+  @override
+  String get myCraftDust => 'My Craft Dust';
+
+  @override
+  String get avatarFrames => 'Avatar Frames';
+
+  @override
+  String get badges => 'Badges';
+
+  @override
+  String get owned => 'Owned';
+
+  @override
+  String get goEquip => 'Equip';
+
+  @override
+  String get exchange => 'Exchange';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get confirmExchange => 'Confirm';
+
+  @override
+  String exchangeWithCraftDust(int amount) {
+    return 'Exchange for $amount Craft Dust?';
+  }
+
+  @override
+  String get insufficientCraftDust => 'Not Enough Craft Dust';
+
+  @override
+  String get earnCraftDustHint => 'Earn Craft Dust from daily tasks.';
+
+  @override
+  String get goToTasks => 'View Tasks';
+
+  @override
+  String get signInToViewTasks => 'Sign in to view tasks';
+
+  @override
+  String get dailyTasks => 'Daily Tasks';
+
+  @override
+  String get careerAchievements => 'Achievements';
+
+  @override
+  String get completedToday => 'Done';
+
+  @override
+  String get loadFailedTapToRetry => 'Load failed. Tap to retry';
+
+  @override
+  String honorRewardNames(String names) {
+    return 'Badge · $names';
+  }
+
+  @override
+  String get listSeparator => ', ';
+
+  @override
+  String get unlocked => 'Unlocked';
+
+  @override
+  String get claimed => 'Done';
+
+  @override
+  String get claim => 'Done';
+
+  @override
+  String get checkIn => 'Check In';
+
+  @override
+  String get pending => 'Pending';
+
+  @override
+  String get signInToViewHonors => 'Sign in to view honors';
+
+  @override
+  String get operationFailed => 'Operation failed';
+
+  @override
+  String get noAvatarFrames => 'No avatar frames yet';
+
+  @override
+  String get noBadges => 'No badges yet';
+
+  @override
+  String get noAvatarFrameEquipped => 'No avatar frame equipped';
+
+  @override
+  String get myAvatarFrames => 'My Avatar Frames';
+
+  @override
+  String get myBadges => 'My Badges';
+
+  @override
+  String get cropAvatar => 'Crop Avatar';
+
+  @override
+  String get unsupportedAvatarFormat =>
+      'Only JPG, JPEG, PNG, HEIC, and HEIF images are supported';
+
+  @override
+  String get avatarUpdated => 'Avatar updated';
+
+  @override
+  String get avatarUploadFailed => 'Avatar upload failed';
+
+  @override
+  String get loginSubtitle => 'Built with craft';
+
+  @override
+  String get githubLogin => 'GitHub Login';
+
+  @override
+  String get authCodeInvalid => 'Invalid code';
+
+  @override
+  String get authCodeExpired => 'Code expired';
+
+  @override
+  String get authCodeRateLimited => 'Try again later';
+
+  @override
+  String get authEmailInvalid => 'Invalid email';
+
+  @override
+  String get authCredentialInvalid => 'Invalid account or password';
+
+  @override
+  String get networkError => 'Network error';
+
+  @override
+  String get loginFailed => 'Login failed';
+
+  @override
+  String get agreementUrlInvalid => 'Invalid agreement URL';
+
+  @override
+  String get openPageFailed => 'Could not open page';
+
+  @override
+  String get notSignedIn => 'Not signed in';
+
+  @override
+  String get accountManagement => 'Account';
+
+  @override
+  String get craftId => 'Craft ID';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get bind => 'Bind';
+
+  @override
+  String get emailAlreadyBound => 'Email already in use';
+
+  @override
+  String get emailBound => 'Email bound';
+
+  @override
+  String get passwordChangeFailed => 'Password change failed';
+
+  @override
+  String get passwordChanged => 'Password changed';
+
+  @override
+  String get passwordReset => 'Password reset';
+
+  @override
+  String get copied => 'Copied';
+
+  @override
+  String get accountDeleted => 'Account deleted';
+
+  @override
+  String get accountDeleteFailed => 'Account deletion failed';
+
+  @override
+  String get logout => 'Log Out';
+
+  @override
+  String get logoutConfirm => 'Log out now?';
+
+  @override
+  String get editUsername => 'Edit Username';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get usernameHint => 'Enter username';
+
+  @override
+  String get usernameLimit => 'Up to 50 characters';
+
+  @override
+  String get nicknameRequired => 'Name is required';
+
+  @override
+  String get nicknameUpdated => 'Name updated';
+
+  @override
+  String get nicknameUpdateFailed => 'Name update failed';
+
+  @override
+  String get editSignature => 'Edit Bio';
+
+  @override
+  String get signatureHint => 'Enter bio';
+
+  @override
+  String get signatureLimit => 'Up to 100 characters';
+
+  @override
+  String get signatureUpdated => 'Bio updated';
+
+  @override
+  String get signatureUpdateFailed => 'Bio update failed';
+
+  @override
+  String get skinTooLarge => 'Image must be under 10 MB';
+
+  @override
+  String get imageReadFailed => 'Could not read image';
+
+  @override
+  String skinUpdated(String mode) {
+    return '$mode theme updated';
+  }
+
+  @override
+  String get skinUpdateFailed => 'Theme image update failed';
+
+  @override
+  String get light => 'Light';
+
+  @override
+  String get dark => 'Dark';
+
+  @override
+  String get noBio => 'No bio';
+
+  @override
+  String get loginOrRegister => 'Log In / Sign Up';
+
+  @override
+  String get loginSyncHint => 'Sync favorites and profile';
+
+  @override
+  String userUnblocked(String name) {
+    return 'Unblocked $name';
+  }
+
+  @override
+  String get reload => 'Reload';
+
+  @override
+  String get noBlockedUsers => 'No blocked users';
+
+  @override
+  String get userHasNoBio => 'No bio';
+
+  @override
+  String get unblock => 'Unblock';
+
+  @override
+  String get supportPrompt => 'Support this open-source project';
+
+  @override
+  String get alipay => 'Alipay';
+
+  @override
+  String get wechatOne => 'WeChat 1';
+
+  @override
+  String get wechatTwo => 'WeChat 2';
+
+  @override
   String get aboutApplications => 'About Applications';
 
   @override
@@ -121,7 +426,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get followSystem => 'Follow system';
 
   @override
-  String get afterOpeningWillFollowTheSystemToOpenOrCloseDarkMode => 'After activation, it will follow the system to turn on or off dark mode';
+  String get afterOpeningWillFollowTheSystemToOpenOrCloseDarkMode =>
+      'After activation, it will follow the system to turn on or off dark mode';
 
   @override
   String get manualSetting => 'Manual settings';
@@ -148,10 +454,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentIsNew => 'There is the latest version of FlutterUnit!';
 
   @override
-  String get checkDatabaseNewVersion => 'Check for new versions of the database';
+  String get checkDatabaseNewVersion =>
+      'Check for new versions of the database';
 
   @override
-  String get viewThisProjectGithubRepository => '《View the Github Repository for this project》';
+  String get viewThisProjectGithubRepository =>
+      '《View the Github Repository for this project》';
 
   @override
   String get favorite => 'Collected';
@@ -208,130 +516,168 @@ class AppLocalizationsEn extends AppLocalizations {
   String get basicDrawing => 'Basic drawing';
 
   @override
-  String get basicDrawingDesc => 'Including some basic graphics drawing examples would be very friendly to beginners in programming. Through these examples, one can learn how to draw basic shapes such as points, lines, rectangles, circles, arcs, text, images, etc., and understand the usage of core objects in drawing like Canvas, Paint, Path, etc.';
+  String get basicDrawingDesc =>
+      'Including some basic graphics drawing examples would be very friendly to beginners in programming. Through these examples, one can learn how to draw basic shapes such as points, lines, rectangles, circles, arcs, text, images, etc., and understand the usage of core objects in drawing like Canvas, Paint, Path, etc.';
 
   @override
   String get animationGesture => 'Animated gestures';
 
   @override
-  String get animationGestureDesc => 'Includes some drawing examples of animation and gestures, which make drawing more interactive. Through these examples, one can learn the usage of animation and gestures, such as sliding, rotating, scaling, moving effects, etc., making drawing not just static presentation.';
+  String get animationGestureDesc =>
+      'Includes some drawing examples of animation and gestures, which make drawing more interactive. Through these examples, one can learn the usage of animation and gestures, such as sliding, rotating, scaling, moving effects, etc., making drawing not just static presentation.';
 
   @override
   String get particleDrawing => 'Particle drawing';
 
   @override
-  String get particleDrawingDesc => 'Includes some drawing examples related to particles, which are top-level operations in drawing. Through these examples, one can learn how to use particles to create stunning visual effects, such as particle clocks, particle explosions, particle backgrounds, etc., giving drawing endless possibilities.';
+  String get particleDrawingDesc =>
+      'Includes some drawing examples related to particles, which are top-level operations in drawing. Through these examples, one can learn how to use particles to create stunning visual effects, such as particle clocks, particle explosions, particle backgrounds, etc., giving drawing endless possibilities.';
 
   @override
   String get interestingDrawing => 'Fun drawing';
 
   @override
-  String get interestingDrawingDesc => 'Includes some fun drawing examples, let\'s experience the joy of drawing, programming, and intelligence together here.';
+  String get interestingDrawingDesc =>
+      'Includes some fun drawing examples, let\'s experience the joy of drawing, programming, and intelligence together here.';
 
   @override
   String get artGallery => 'Art galleries ';
 
   @override
-  String get artGalleryDesc => 'Includes some hall-level drawing examples, which are pinnacle works of drawing. They have no practicality and are not born for any demand. They exist only because they exist, serving as a medium for human wisdom and expression, called art.';
+  String get artGalleryDesc =>
+      'Includes some hall-level drawing examples, which are pinnacle works of drawing. They have no practicality and are not born for any demand. They exist only because they exist, serving as a medium for human wisdom and expression, called art.';
 
   @override
-  String get drawingOfImages => 'This example explains how to draw images: by loading images and drawing image resources to a specified area. Draw a batch of 45 \"angled grid lines on the upper layer to practice drawing the lines ';
+  String get drawingOfImages =>
+      'This example explains how to draw images: by loading images and drawing image resources to a specified area. Draw a batch of 45 \"angled grid lines on the upper layer to practice drawing the lines ';
 
   @override
-  String get digitalDisplayTube => 'This example introduces how to draw LED digital display tubes to practice the use, transformation, combination of path paths, and knowledge of component packaging. It is a very good drawing case ';
+  String get digitalDisplayTube =>
+      'This example introduces how to draw LED digital display tubes to practice the use, transformation, combination of path paths, and knowledge of component packaging. It is a very good drawing case ';
 
   @override
-  String get pathDrawing => 'This example introduces how to perform simple path drawing, rotate the drawing board, and combine animation to make the windmill rotate. This is a very concise case of combining drawing and animation. ';
+  String get pathDrawing =>
+      'This example introduces how to perform simple path drawing, rotate the drawing board, and combine animation to make the windmill rotate. This is a very concise case of combining drawing and animation. ';
 
   @override
-  String get gridCoordinateSystem => 'This example explains how to use line diameter and text to draw a grid coordinate system, and encapsulate the drawn objects for easy reuse. The coordinate system also provides reference during drawing, which is essential for beginners.';
+  String get gridCoordinateSystem =>
+      'This example explains how to use line diameter and text to draw a grid coordinate system, and encapsulate the drawn objects for easy reuse. The coordinate system also provides reference during drawing, which is essential for beginners.';
 
   @override
-  String get polarCoordinateSystemOfFaces => 'This example explains how to use a polar coordinate system to draw a plane and collect polar coordinates based on a function equation for drawing. ';
+  String get polarCoordinateSystemOfFaces =>
+      'This example explains how to use a polar coordinate system to draw a plane and collect polar coordinates based on a function equation for drawing. ';
 
   @override
-  String get drawFunctionCurvesForPathPairs => 'This example explains how to use a path to draw a function curve, fitting a small number of points on the function curve through a Bessel curve. ';
+  String get drawFunctionCurvesForPathPairs =>
+      'This example explains how to use a path to draw a function curve, fitting a small number of points on the function curve through a Bessel curve. ';
 
   @override
-  String get drawRegularPolygons => 'This example introduces how to collect points in a circle and draw regular polygons, which is a good example for practicing drawing and forming paths. \n Special operations:+, - Modify the number of edges';
+  String get drawRegularPolygons =>
+      'This example introduces how to collect points in a circle and draw regular polygons, which is a good example for practicing drawing and forming paths. \n Special operations:+, - Modify the number of edges';
 
   @override
-  String get randomNumberProcessing => 'This example introduces drawing rectangles and handling random numbers. Determine the rectangular position information through a set of points and draw it. Can practice the ability to control data.';
+  String get randomNumberProcessing =>
+      'This example introduces drawing rectangles and handling random numbers. Determine the rectangular position information through a set of points and draw it. Can practice the ability to control data.';
 
   @override
-  String get clockDrawing => 'This example uses the drawing of a clock to practice the drawing technique of rotating scale types in Flutter, and uses animation to rotate the dial pointer.';
+  String get clockDrawing =>
+      'This example uses the drawing of a clock to practice the drawing technique of rotating scale types in Flutter, and uses animation to rotate the dial pointer.';
 
   @override
-  String get drawSprings => ' This example introduces how to draw a spring, stretch and compress it vertically through the contact points, and restore the animation when releasing it. It is a good comprehensive small case. Special operation: Drag the telescopic spring up and down ';
+  String get drawSprings =>
+      ' This example introduces how to draw a spring, stretch and compress it vertically through the contact points, and restore the animation when releasing it. It is a good comprehensive small case. Special operation: Drag the telescopic spring up and down ';
 
   @override
-  String get theApplicationOfAnglesInDrawing => 'This example explains how to perform rotational motion based on a point as the center. Learn the application of the angle between two points in drawing. \n Special operation: Click to run';
+  String get theApplicationOfAnglesInDrawing =>
+      'This example explains how to perform rotational motion based on a point as the center. Learn the application of the angle between two points in drawing. \n Special operation: Click to run';
 
   @override
-  String get usingShadersAndFilters => 'This example explains how to use shaders and filters in painting, and achieve a rotating streamer effect through animation with numerical variations.';
+  String get usingShadersAndFilters =>
+      'This example explains how to use shaders and filters in painting, and achieve a rotating streamer effect through animation with numerical variations.';
 
   @override
-  String get pathDrawingFunctionCurve => 'This example explains how to use path to draw function curves and use path measurement for animation';
+  String get pathDrawingFunctionCurve =>
+      'This example explains how to use path to draw function curves and use path measurement for animation';
 
   @override
-  String get thePathOfBingDwenDwen => 'This sample will draw the path of the mascot Bing Dwen Dwen for the 2022 Beijing Winter Olympics and use path measurement for animation. \n Special operation: Click to run';
+  String get thePathOfBingDwenDwen =>
+      'This sample will draw the path of the mascot Bing Dwen Dwen for the 2022 Beijing Winter Olympics and use path measurement for animation. \n Special operation: Click to run';
 
   @override
-  String get drawCubicBesselCurve => 'This example introduces how to draw a cubic Bezier curve, determine whether a point is activated through the contacts, and use this to control the position of the point to achieve drag control effect. \n Special operation: Click on the drawing point, double-click to clear it';
+  String get drawCubicBesselCurve =>
+      'This example introduces how to draw a cubic Bezier curve, determine whether a point is activated through the contacts, and use this to control the position of the point to achieve drag control effect. \n Special operation: Click on the drawing point, double-click to clear it';
 
   @override
-  String get theEffectOfAnimationCurve => 'This example provides an intuitive way to examine the effect of animation curves, allowing everyone to have a deeper understanding of animation. \n Special operation: Click to run';
+  String get theEffectOfAnimationCurve =>
+      'This example provides an intuitive way to examine the effect of animation curves, allowing everyone to have a deeper understanding of animation. \n Special operation: Click to run';
 
   @override
-  String get randomParticlesAndBoundaryBouncing => 'This example introduces how to create random particles and handle boundary bounce logic, which is a great starting point for learning particle motion. Special operation: click to stop running ';
+  String get randomParticlesAndBoundaryBouncing =>
+      'This example introduces how to create random particles and handle boundary bounce logic, which is a great starting point for learning particle motion. Special operation: click to stop running ';
 
   @override
-  String get particleCollision => 'This example introduces how to perform collision detection on a particle and split multiple particles, which is an interesting case. \n Special operation: Click Reset';
+  String get particleCollision =>
+      'This example introduces how to perform collision detection on a particle and split multiple particles, which is an interesting case. \n Special operation: Click Reset';
 
   @override
-  String get particle => 'This example introduces using particles to represent images and animating them to achieve explosive effects. \nSpecial operation: Click to run';
+  String get particle =>
+      'This example introduces using particles to represent images and animating them to achieve explosive effects. \nSpecial operation: Click to run';
 
   @override
-  String get rectangleAndRandomNumbers => 'This example introduces drawing rectangles and handling random numbers. Determine the rectangular position information through a set of points and draw it. Can practice the ability to control data. \nSpecial operation: Click to randomly generate';
+  String get rectangleAndRandomNumbers =>
+      'This example introduces drawing rectangles and handling random numbers. Determine the rectangular position information through a set of points and draw it. Can practice the ability to control data. \nSpecial operation: Click to randomly generate';
 
   @override
-  String get bingDwenDwen => 'This example is to draw the shape of the mascot Bing Dwen Dwen for the 2022 Beijing Winter Olympics, from which you can learn knowledge such as path drawing and gradient colors.';
+  String get bingDwenDwen =>
+      'This example is to draw the shape of the mascot Bing Dwen Dwen for the 2022 Beijing Winter Olympics, from which you can learn knowledge such as path drawing and gradient colors.';
 
   @override
-  String get pufengInjectionTest => 'This sample implements the testing process of the Pufeng needle injection test, estimating pi based on probability. You can learn some drawing tips and logical processing of data.';
+  String get pufengInjectionTest =>
+      'This sample implements the testing process of the Pufeng needle injection test, estimating pi based on probability. You can learn some drawing tips and logical processing of data.';
 
   @override
-  String get ticTacToe => 'This example combines important skills such as gestures, drawing, animation, and verification through the drawing and logical verification of the Chinese checkerboard, making it a very good case study. \n Special operation: Double click to reset';
+  String get ticTacToe =>
+      'This example combines important skills such as gestures, drawing, animation, and verification through the drawing and logical verification of the Chinese checkerboard, making it a very good case study. \n Special operation: Double click to reset';
 
   @override
-  String get tiledLines => 'The root cause of this example comes from generateArchistry.com tiled-lines,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
+  String get tiledLines =>
+      'The root cause of this example comes from generateArchistry.com tiled-lines,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
 
   @override
-  String get joyDivision => 'The root cause of this example comes from generateArchistry.com joy-division,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
+  String get joyDivision =>
+      'The root cause of this example comes from generateArchistry.com joy-division,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
 
   @override
-  String get cubicDisarray => 'The root cause of this example comes from generateArchistry.com cubic-disarray,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
+  String get cubicDisarray =>
+      'The root cause of this example comes from generateArchistry.com cubic-disarray,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
 
   @override
-  String get triangularMesh => 'The root cause of this example comes from generateArchistry.com triangular-mesh,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
+  String get triangularMesh =>
+      'The root cause of this example comes from generateArchistry.com triangular-mesh,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
 
   @override
-  String get unDeuxTrois => 'The root cause of this example comes from generateArchistry.com un-deux-trois,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
+  String get unDeuxTrois =>
+      'The root cause of this example comes from generateArchistry.com un-deux-trois,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
 
   @override
-  String get circlePacking => 'The root cause of this example comes from generateArchistry.com circle-packing,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
+  String get circlePacking =>
+      'The root cause of this example comes from generateArchistry.com circle-packing,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
 
   @override
-  String get hypnoticSquares => 'The root cause of this example comes from generateArchistry.com hypnotic-squares,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
+  String get hypnoticSquares =>
+      'The root cause of this example comes from generateArchistry.com hypnotic-squares,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
 
   @override
-  String get pietMondrian => 'The root cause of this example comes from generateArchistry.com piet-mondrian,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
+  String get pietMondrian =>
+      'The root cause of this example comes from generateArchistry.com piet-mondrian,Implemented by xrr 2016 using Flutter。Warehouse address:flutter-generative-artistry';
 
   @override
-  String get downloadCompressedPackage => 'Usage: \n1. Select the icon in iconfont.cn, add the project, and download the compressed file. \n2. Select the Flutter project address, configure resource and product file locations. \n3.Click the Generate Code button to generate the relevant code.';
+  String get downloadCompressedPackage =>
+      'Usage: \n1. Select the icon in iconfont.cn, add the project, and download the compressed file. \n2. Select the Flutter project address, configure resource and product file locations. \n3.Click the Generate Code button to generate the relevant code.';
 
   @override
-  String get qAIssues => 'The QA data in the key points collection is included in FlutterUnit\'s issues labeled with points. If data needs to be provided, simply ask and answer in the issues section.';
+  String get qAIssues =>
+      'The QA data in the key points collection is included in FlutterUnit\'s issues labeled with points. If data needs to be provided, simply ask and answer in the issues section.';
 
   @override
   String get tips => 'tips:';
@@ -412,13 +758,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectPath => 'Project Path';
 
   @override
-  String get inputProjectAddress => 'Please select or enter the project address';
+  String get inputProjectAddress =>
+      'Please select or enter the project address';
 
   @override
-  String get iconfontCompressedPackagePath => 'Iconfont Compressed package path';
+  String get iconfontCompressedPackagePath =>
+      'Iconfont Compressed package path';
 
   @override
-  String get pleaseSelectOrInputIconfontCompressedPackagePath => 'Please select or enter the compressed file path for iconfont download';
+  String get pleaseSelectOrInputIconfontCompressedPackagePath =>
+      'Please select or enter the compressed file path for iconfont download';
 
   @override
   String get stayTuned => 'Stay tuned';
@@ -446,9 +795,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgeTabLayout => 'Layout Treasury';
-
-  @override
-  String get knowledgeTabPoint => 'Key Points';
 
   @override
   String get knowledgeConstruction => 'In Construction';
@@ -487,7 +833,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dataSetBackupFailure => 'Dataset backup failed!';
 
   @override
-  String get dataSynchronizationCopySuccess => 'Data synchronization successful!';
+  String get dataSynchronizationCopySuccess =>
+      'Data synchronization successful!';
 
   @override
   String get dataSynchronizationCopyFailure => 'Data synchronization failed!';

@@ -1,0 +1,24 @@
+name: Build Android Google AAB
+
+on:
+  workflow_dispatch:
+    inputs:
+      submit_for_review:
+        description: Upload production AAB to Google Play and submit it for review
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/android-release.yml
+    with:
+      flavor: google
+      display_name: Google AAB
+      artifact_suffix: google
+      publish_to_release: false
+      upload_to_google_play: ${{ inputs.submit_for_review }}
+    secrets: inherit

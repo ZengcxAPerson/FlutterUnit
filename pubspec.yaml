@@ -1,7 +1,7 @@
 name: flutter_unit
 description: All Platform Flutter Experience App.
 publish_to: none
-version: 3.4.1+2009
+version: 3.4.3+2019
 author: 张风捷特烈 <1981462002@qq.com>
 homepage: https://juejin.cn/user/149189281194766/posts
 
@@ -44,9 +44,15 @@ dependencies:
   fx_platform_adapter: 0.0.3 # 平台适配器
   fx_go_router_ext: 0.0.6+1 # 路由
   fx_dao: 0.0.3+4
-  fx_dio: 0.0.4+3
+  fx_dio: 0.0.6
   fx_boot_starter: 0.1.1 # app 启动器
   fx_trace: 0.0.5+5 # 异常追踪/监听
+  fx_ability: 0.1.0
+  fx_user_core: 0.0.1
+  fx_user_session: 0.0.1
+  fx_user_http: 0.1.0
+  fx_user_ui: 0.0.2
+  fx_account: 0.1.1
 
   # 数据与持久化
   dio: ^5.4.3+1 # 网络请求
@@ -64,7 +70,13 @@ dependencies:
   package_info_plus: 8.1.4
 
   # 视图展示
-  tolyui: 0.0.4+10   # tolyui
+  toly_ui:
+    path: modules/basic_system/toly_ui
+  authentication:
+    path: modules/basic_system/authentication
+  tolyui: 0.0.5+2   # tolyui
+  tolyui_navigation: 0.2.1+1
+  tolyui_message: ^0.2.6+1
   tolyui_refresh: 0.0.1+1 # 下拉刷新
 
   dash_painter: ^1.0.2 # 虚线
@@ -73,6 +85,7 @@ dependencies:
   toggle_rotate: ^1.0.1 # 点击旋转
   wrapper: ^1.0.2 # 气泡包裹
   webview_flutter: ^4.2.4 # webview
+  sign_in_with_apple: ^6.1.0 # Apple 登录
   flutter_markdown: ^0.7.2+1 # markdown
   flutter_svg: ^2.0.17 # svg 展示
 
@@ -82,17 +95,22 @@ dependencies:
 
   pkg_player:
     path: modules/tools_system/pkg_player
+  unit_env:
+    path: modules/basic_system/unit_env
   uuid: ^4.5.1
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
   flutter_lints: ^4.0.0
 
 dependency_overrides:
   web: ^1.0.0
   intl: 0.20.2
-  fx_dio: 0.0.4+3
   flutter_bloc: ^9.1.1
+  # 统一 tolyui_navigation 与 fx_go_router_ext 的同一补丁线依赖。
+  tolyui_meta: 0.0.2+2
 
 flutter:
   generate: true
@@ -135,14 +153,3 @@ toly:
     src_zip: ''
     assets_dir: 'assets/iconfont'
     file_dist: 'packages/app/lib/app/res/toly_icon.dart'
-
-
-
-
-
-
-
-
-
-
-

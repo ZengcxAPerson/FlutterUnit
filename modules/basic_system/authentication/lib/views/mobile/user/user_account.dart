@@ -1,414 +1,271 @@
-import 'dart:io';
-import 'dart:ui';
-
-import 'package:authentication/blocs/authentic/bloc.dart';
-import 'package:authentication/blocs/user/bloc.dart';
-import 'package:toly_ui/toly_ui.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fx_account/fx_account.dart';
+import 'package:fx_exception/fx_exception.dart';
+import 'package:fx_user_core/fx_user_core.dart';
+import 'package:fx_user_session/fx_user_session.dart';
+import 'package:l10n/l10n.dart';
+import 'package:toly_ui/toly_ui.dart';
+import 'package:utils/utils.dart';
 
-import '../../../blocs/authentic/event.dart';
-import '../../../blocs/user/state.dart';
+import '../../user_avatar.dart';
+import 'avatar/avatar_update_flow.dart';
+import 'user_edit_name_page.dart';
+import 'user_edit_signature_page.dart';
 
+/// 当前登录用户的账户资料页，布局与交互对齐 ViewX 移动端账号管理页。
 class UserAccountPage extends StatelessWidget {
-  const UserAccountPage({Key? key}) : super(key: key);
+  const UserAccountPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Icon trailing = const Icon(
-      Icons.navigate_next,
-      color: Color(0xffD9D9D9),
+    return BlocBuilder<FxUserSessionCubit, FxUserSession>(
+      builder: _buildSession,
     );
-    Color? color = Theme.of(context).listTileTheme.tileColor;
-    Color? sbgColor = Theme.of(context).appBarTheme.backgroundColor;
-    Color? bgColor  = Theme.of(context).scaffoldBackgroundColor;
-    bool isDark = Theme.of(context).brightness == Brightness.dark;
+  }
 
-    UserPerformance performance = context.select<UserBloc, UserPerformance>(
-      (bloc) => bloc.state,
+  Widget _buildSession(BuildContext context, FxUserSession session) {
+    if (session is! FxAuthed) {
+      return Scaffold(body: Center(child: Text(context.l10n.notSignedIn)));
+    }
+    final FxIdentity user = session.user;
+    final String signature = user.read(FxIdentityFields.signature) ?? '';
+    final String? email = user.read(FxIdentityFields.email);
+    final bool hasPassword = user.read(FxIdentityFields.hasPassword) ?? false;
+    return AccountManagementPage(
+      data: AccountManagementData(
+        title: context.l10n.accountManagement,
+        avatar: const Align(
+          alignment: Alignment.centerRight,
+          child: SizedBox.square(
+            dimension: 48,
+            child: SessionUserAvatar(size: 48, cornerRadius: 6),
+          ),
+        ),
+        username: user.displayName ?? '',
+        signature: signature,
+        userId: user.id,
+        userIdLabel: context.l10n.craftId,
+        contactItems: <AccountManagementItem>[
+          AccountManagementItem(
+            label: context.l10n.email,
+            value: email?.isNotEmpty == true ? email! : context.l10n.bind,
+            valueColor:
+                email?.isNotEmpty == true ? null : const Color(0xFFFF7A00),
+            onTap: () => _openBindEmailPage(context, email),
+          ),
+        ],
+        hasPassword: hasPassword,
+        onSetPassword: () => _openSetPasswordPage(context),
+        onChangePassword: () => _openChangePasswordPage(context),
+        onAvatarTap: () => AvatarUpdateFlow.start(context),
+        onUsernameTap: () => _openNameEditor(context, user.displayName ?? ''),
+        onSignatureTap: () => _openSignatureEditor(context, signature),
+        onCopyUserId: () async => _copyId(context, user.id),
+        onDeleteAccount: () => _openDeleteAccountPage(context),
+        onLogout: () => _confirmLogout(context),
+      ),
     );
-    return Scaffold(
-      backgroundColor: isDark ? null : bgColor,
-      appBar: AppBar(
-        backgroundColor: isDark ? null : sbgColor,
-        title: const Text(
-          '账号资料',
+  }
+
+  /// 打开公共邮箱绑定页并接入统一会话能力。
+  Future<void> _openBindEmailPage(
+    BuildContext context,
+    String? currentEmail,
+  ) {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext pageContext) => BindEmailPage(
+          currentEmail: currentEmail,
+          onValidateEmail: (String email) => _checkEmail(context, email),
+          onRequestCode: (String email) =>
+              context.read<FxUserSessionCubit>().requestCode(
+                    channel: 'email',
+                    identifier: email,
+                    scene: FxVerificationCodeScene.bindEmail,
+                  ),
+          onSubmit: (String email, String code) =>
+              _bindEmail(pageContext, email, code),
+          onMessage: (String message) => Toast.warning(context, message),
         ),
       ),
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 10,
-          ),
-          GestureDetector(
-            onTap: () => _showPicker(context),
-            child: Container(
-              color: color,
-              height: 64,
-              child: Row(
-                children: [
-                  Container(
-                      padding: const EdgeInsets.only(left: 15),
-                      width: 120,
-                      child: const Text('头像')),
-                  const Spacer(),
-                  // AuthUserAvatar(
-                  //   size: 50,
-                  //   borderSize: 2,
-                  // ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: trailing,
-                  )
-                ],
-              ),
-            ),
-          ),
-          Divider(
-            height: 1 / window.devicePixelRatio,
-            thickness: 1 / window.devicePixelRatio,
-          ),
-          GestureDetector(
-            onTap: () {
-              // LoggingUploader.onEvent(kSetNameAction, kMyInfoPageName);
-              // Navigator.push(
-              //     context,
-              //     Right2LeftRouter(
-              //         duration: Duration(milliseconds: 200),
-              //         child: UserChangeNamePage(
-              //           name: performance.username,
-              //         )));
-            },
-            child: Container(
-              color: color,
-              height: 54,
-              child: Row(
-                children: [
-                  Container(
-                      padding: const EdgeInsets.only(left: 15),
-                      width: 120,
-                      child: const Text('昵称')),
-                  const Spacer(),
-                  Text(
-                    performance.username ?? '',
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: trailing,
-                  )
-                ],
-              ),
-            ),
-          ),
-          Divider(
-            height: 1 / window.devicePixelRatio,
-            thickness: 1 / window.devicePixelRatio,
-          ),
-          Container(
-            color: color,
-            height: 54,
-            child: Row(
-              children: [
-                Container(
-                    padding: const EdgeInsets.only(left: 15),
-                    width: 120,
-                    child: const Text('箴言')),
-                const Spacer(),
-                const Text(
-                  // '${performance.userId}',
-                  '海的彼岸，有我未曾见证的风采。', style: TextStyle(color: Colors.grey,fontSize: 12),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Icon(
-                    Icons.arrow_forward_ios_sharp,
-                    size: 20,
-                    color: Colors.transparent,
-                  ),
-                )
-              ],
-            ),
-          ),
+    );
+  }
 
-          // const SizedBox(
-          //   height: 10,
-          // ),
+  /// 检查邮箱是否可以绑定到当前账号。
+  Future<bool> _checkEmail(BuildContext context, String email) async {
+    final FxAccountCheckResult result = await context
+        .read<FxUserSessionCubit>()
+        .checkAccount(type: 'email', identifier: email);
+    if (!result.available && context.mounted) {
+      Toast.warning(context, context.l10n.emailAlreadyBound);
+    }
+    return result.available;
+  }
 
-          // Container(
-          //   color: color,
-          //   height: 54,
-          //   child: Row(
-          //     children: [
-          //       Container(
-          //           padding: EdgeInsets.only(left: 15),
-          //           width: 120,
-          //           child: Text('免费蜂蜜/日')),
-          //       Spacer(),
-          //       Text(
-          //         '${ 0}',
-          //         style: TextStyle(color: Colors.grey),
-          //       ),
-          //       Padding(
-          //         padding: const EdgeInsets.symmetric(horizontal: 12),
-          //         child: Icon(
-          //           Icons.arrow_forward_ios_sharp,
-          //           size: 20,
-          //           color: Colors.transparent,
-          //         ),
-          //       )
-          //     ],
-          //   ),
-          // ),
-          // Divider(
-          //   height: 1 / window.devicePixelRatio,
-          //   thickness: 1 / window.devicePixelRatio,
-          // ),
-          // Container(
-          //   color: color,
-          //   height: 54,
-          //   child: Row(
-          //     children: [
-          //       Container(
-          //           padding: EdgeInsets.only(left: 15),
-          //           width: 120,
-          //           child: Text('蜂蜜')),
-          //       Spacer(),
-          //       Text(
-          //         '${0}',
-          //         style: TextStyle(color: Colors.grey),
-          //       ),
-          //       Padding(
-          //         padding: const EdgeInsets.symmetric(horizontal: 12),
-          //         child: Icon(
-          //           Icons.arrow_forward_ios_sharp,
-          //           size: 20,
-          //           color: Colors.transparent,
-          //         ),
-          //       )
-          //     ],
-          //   ),
-          // ),
+  /// 绑定邮箱并返回账号管理页。
+  Future<void> _bindEmail(
+    BuildContext context,
+    String email,
+    String code,
+  ) async {
+    await context
+        .read<FxUserSessionCubit>()
+        .bindEmail(email: email, code: code);
+    if (!context.mounted) return;
+    Toast.success(context, context.l10n.emailBound);
+    Navigator.of(context).pop();
+  }
 
-          const SizedBox(
-            height: 10,
-          ),
-          Container(
-            color: color,
-            height: 54,
-            child: Row(
-              children: [
-                Container(
-                    padding: const EdgeInsets.only(left: 15),
-                    width: 120,
-                    child: const Text('账号')),
-                const Spacer(),
-                const Text(
-                  // '${performance.userId}',
-                  '******', style: TextStyle(color: Colors.grey,fontSize: 12),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Icon(
-                    Icons.arrow_forward_ios_sharp,
-                    size: 20,
-                    color: Colors.transparent,
-                  ),
-                )
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          ListTile(
-            title: const Center(
-                child: Text(
-                  '退出登录',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                )),
-
-            // trailing: _nextIcon(context),
-            onTap: () {
-              showDialog(
-                  context: context,
-                  builder: (ctx) => AlertConformDialog(
-                      title: "登出提示",
-                      content: "退出后将无法使用用户相关的功能，确定退出登录吗？",
-                      conformText: '确定',
-                      onConform: () async {
-                        context.read<AuthBloc>().add(const Logout());
-                        // Navigator.of(context).pushAndRemoveUntil(
-                        //   NoAnimRouter(AuthRelation(
-                        //     pushLogin: false,
-                        //     child: MoAILoginPage(
-                        //       model: LoginModel(
-                        //           appName: "蜜蜂AI智能助手",
-                        //           appNameEn:
-                        //           "Bee Chat AI Intelligence Assistant",
-                        //           appIcon: Icons.widgets_outlined,
-                        //           loginBgAssets: "assets/images/login_bg.png"),
-                        //     ),
-                        //   )),
-                        //   ModalRoute.withName('/'),
-                        // );
-                        return true;
-                      }));
-            },
-          ),
-          Divider(
-            height: 1 / window.devicePixelRatio,
-            thickness: 1 / window.devicePixelRatio,
-          ),
-          // const SizedBox(
-          //   height: 10,
-          // ),
-          // if(false)
-          ListTile(
-            title: const Center(
-                child: Text(
-                  '删除账号',
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.redAccent),
-                )),
-
-            // trailing: _nextIcon(context),
-            onTap: () {
-              String msg =
-                  "确定删除账号吗？删除后你将无法再访问蜜蜂 ai 提供的智能服务，并清空你的所有账号资料，点击确定删除。";
-              showDialog(
-                  context: context,
-                  builder: (ctx) => Dialog(
-                    child: MobileMessagePanel(
-                      title: '清空提示',
-                      conformText: '确定',
-                      msg: msg,
-                      task: (_) async {
-                        // await Future.delayed(Duration(seconds: 3));
-                        // await context.read<UserBloc>().repo.unregister();
-                        //
-                        context.read<AuthBloc>().add(const Logout());
-
-                        // Navigator.of(context).pushAndRemoveUntil(
-                        //   NoAnimRouter(AuthRelation(
-                        //     pushLogin: false,
-                        //     child: MoAILoginPage(
-                        //       model: LoginModel(
-                        //           appName: "蜜蜂AI智能助手",
-                        //           appNameEn:
-                        //           "Bee Chat AI Intelligence Assistant",
-                        //           appIcon: Icons.widgets_outlined,
-                        //           loginBgAssets:
-                        //           "assets/images/login_bg.png"),
-                        //     ),
-                        //   )),
-                        //   ModalRoute.withName('/'),
-                        // );
-                      },
-                    ),
-                  ));
-            },
-          ),
-        ],
+  /// 打开公共修改密码页。
+  Future<void> _openChangePasswordPage(BuildContext context) {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext pageContext) => ChangePasswordPage(
+          onForgotPassword: () => _openForgotPasswordPage(pageContext),
+          onSubmit: (String oldPassword, String newPassword) =>
+              _changePassword(pageContext, oldPassword, newPassword),
+        ),
       ),
     );
   }
 
-  void _showPicker(BuildContext context) async {
-    // FilePickerResult? result =
-    //     await FilePicker.platform.pickFiles(type: FileType.image);
-    // if (result != null) {
-    //   String? p = result.files.single.path;
-    //   if (p != null) {
-    //     // File file = File(p);
-    //     // Share.shareXFiles([XFile(file.path)], text: 'Great picture');
-    //     Navigator.push(
-    //         context,
-    //         NoAnimRouter(ClipImagePage(
-    //           image: FileImage(File(p)),
-    //         )));
-    //   }
-    // }
-    // // showCupertinoModalPopup(
-    // //     context: context,
-    // //     builder: (ctx) => ClipRRect(
-    // //           borderRadius: BorderRadius.only(
-    // //             topLeft: Radius.circular(10),
-    // //             topRight: Radius.circular(10),
-    // //           ),
-    // //           child: SizedBox(
-    // //             width: 500,
-    // //             child: AsyncPopPicker(
-    // //               title: Text(
-    // //                 '更换头像',
-    // //                 style: TextStyle(color: Colors.grey),
-    // //               ),
-    // //               tasks: [
-    // //                 AsyncPopItem(
-    // //                   task: () async {
-    // //                     try {
-    // //                       FilePickerResult? result = await FilePicker.platform
-    // //                           .pickFiles(type: FileType.image);
-    // //                       if (result != null) {
-    // //                         String? p = result.files.single.path;
-    // //                         if (p != null) {
-    // //                           // File file = File(p);
-    // //                           // Share.shareXFiles([XFile(file.path)], text: 'Great picture');
-    // //                           Navigator.push(
-    // //                               context,
-    // //                               NoAnimRouter(ClipImagePage(
-    // //                                 image: FileImage(File(p)),
-    // //                               )));
-    // //                         }
-    // //                       }
-    // //                     } catch (e) {
-    // //                       Toast.warning("当前应用没有文件读写权限，请先在权限管理中允许!");
-    // //                     }
-    // //                   },
-    // //                   info: '从相册选取',
-    // //                 ),
-    // //               ],
-    // //             ),
-    // //           ),
-    // //         ));
+  /// 为尚未拥有密码的账号打开首次设置页。
+  Future<void> _openSetPasswordPage(BuildContext context) {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext pageContext) => SetPasswordPage(
+          onSubmit: context.read<FxUserSessionCubit>().setPassword,
+          onMessage: (String message) => Toast.warning(context, message),
+        ),
+      ),
+    );
   }
-}
 
-class UserItemPanel extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? color;
-  const UserItemPanel(
-      {Key? key, required this.label, required this.value, required this.color})
-      : super(key: key);
+  /// 修改当前账号密码并返回账号管理页。
+  Future<void> _changePassword(
+    BuildContext context,
+    String oldPassword,
+    String newPassword,
+  ) async {
+    final bool changed =
+        await context.read<FxUserSessionCubit>().changePassword(
+              oldPassword: oldPassword,
+              newPassword: newPassword,
+            );
+    if (!context.mounted) return;
+    if (!changed) {
+      Toast.error(context, context.l10n.passwordChangeFailed);
+      return;
+    }
+    Toast.success(context, context.l10n.passwordChanged);
+    Navigator.of(context).pop();
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: color,
-      height: 54,
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-                padding: const EdgeInsets.only(left: 15), child: Text(label)),
-          ),
-          Text(
-            value,
-            style: const TextStyle(color: Colors.grey),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
-            child: Icon(
-              Icons.arrow_forward_ios_sharp,
-              size: 20,
-              color: Colors.transparent,
-            ),
-          )
-        ],
+  /// 打开公共邮箱验证码找回密码页。
+  Future<void> _openForgotPasswordPage(BuildContext context) {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext pageContext) => ForgotPasswordPage(
+          onRequestCode: (String email) =>
+              context.read<FxUserSessionCubit>().requestCode(
+                    channel: 'email',
+                    identifier: email,
+                    scene: FxVerificationCodeScene.resetPassword,
+                  ),
+          onSubmit: (String email, String code, String newPassword) =>
+              _resetPassword(pageContext, email, code, newPassword),
+          onMessage: (String message) => Toast.warning(context, message),
+        ),
+      ),
+    );
+  }
+
+  /// 通过邮箱验证码重置密码。
+  Future<void> _resetPassword(
+    BuildContext context,
+    String email,
+    String code,
+    String newPassword,
+  ) async {
+    await context.read<FxUserSessionCubit>().resetPassword(
+          email: email,
+          code: code,
+          newPassword: newPassword,
+        );
+    if (!context.mounted) return;
+    Toast.success(context, context.l10n.passwordReset);
+    Navigator.of(context).pop();
+  }
+
+  Future<void> _openNameEditor(BuildContext context, String name) {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => UserEditNamePage(name: name),
+      ),
+    );
+  }
+
+  Future<void> _openSignatureEditor(
+    BuildContext context,
+    String signature,
+  ) {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) =>
+            UserEditSignaturePage(signature: signature),
+      ),
+    );
+  }
+
+  /// 复制用户 ID 并通过统一 Toast 反馈。
+  void _copyId(BuildContext context, String id) {
+    Clipboard.setData(ClipboardData(text: id));
+    Toast.success(context, context.l10n.copied);
+  }
+
+  /// 打开 FrameworkX 提供的风险确认与密码验证页面。
+  Future<void> _openDeleteAccountPage(BuildContext context) {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext pageContext) => DeleteAccountPage(
+          onMessage: (String message) => Toast.warning(context, message),
+          onSubmit: (String password) => _deleteAccount(context, password),
+        ),
+      ),
+    );
+  }
+
+  /// 注销远端账号、清理本地会话，并返回应用首页。
+  Future<void> _deleteAccount(BuildContext context, String password) async {
+    try {
+      await context.read<FxUserSessionCubit>().deleteAccount(password);
+      if (!context.mounted) return;
+      Toast.success(context, context.l10n.accountDeleted);
+      Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
+    } on RequestException {
+      if (!context.mounted) return;
+      Toast.error(context, context.l10n.accountDeleteFailed);
+    } catch (_) {
+      if (!context.mounted) return;
+      Toast.error(context, context.l10n.accountDeleteFailed);
+    }
+  }
+
+  /// 二次确认后退出登录并回到应用首页。
+  Future<void> _confirmLogout(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertConformDialog(
+        title: context.l10n.logout,
+        content: context.l10n.logoutConfirm,
+        conformText: context.l10n.logout,
+        conformTextColor: Colors.red,
+        onConform: () async {
+          await context.read<FxUserSessionCubit>().logout();
+          if (context.mounted) Navigator.of(context).pop();
+        },
       ),
     );
   }

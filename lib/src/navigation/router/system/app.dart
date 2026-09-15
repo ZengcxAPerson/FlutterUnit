@@ -2,6 +2,7 @@ import 'package:app/app.dart';
 import 'package:artifact/artifact.dart';
 import 'package:authentication/authentication.dart';
 import 'package:draw_system/draw_system.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:treasure_tools/treasure_tools.dart';
 
 List<GoRoute> get systemRoutes => [
@@ -10,8 +11,29 @@ List<GoRoute> get systemRoutes => [
         builder: (_, __) => const DataManagePage(),
       ),
       GoRoute(
+        path: AppRoute.blacklist.path,
+        builder: (_, __) => const BlacklistPage(),
+      ),
+      GoRoute(
         path: AppRoute.account.path,
-        builder: (_, __) => const DeskAccountPage(),
+        builder: (_, __) => const DesktopUserPage(),
+      ),
+      GoRoute(
+        path: AppRoute.honors.path,
+        builder: (_, GoRouterState state) => AvatarHonorsPage(
+          initialKind: state.uri.queryParameters['tab'] ?? 'avatar_frame',
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.progression.path,
+        builder: (_, __) => const TaskAchievementPage(),
+      ),
+      GoRoute(
+        path: AppRoute.workshop.path,
+        builder: (_, __) => BlocProvider<WorkshopCubit>(
+          create: (_) => WorkshopCubit(WorkshopRepository())..load(),
+          child: const WorkshopPage(),
+        ),
       ),
       GoRoute(
         path: AppRoute.aboutApp.path,
@@ -21,21 +43,24 @@ List<GoRoute> get systemRoutes => [
         path: AppRoute.aboutMe.path,
         builder: (_, __) => const AboutMePage(),
       ),
-      GoRoute(
-        path: AppRoute.supportMe.path,
-        builder: (_, __) => const SupportMe(),
-      ),
+      if (!kAppEnv.isIos)
+        GoRoute(
+          path: AppRoute.supportMe.path,
+          builder: (_, __) => const SupportMe(),
+        ),
       if (kAppEnv.isDesktopUI) ...deskTopRoutes
     ];
 
 List<GoRoute> get deskTopRoutes => [
       GoRoute(
         path: AppRoute.knowledge.path,
-        builder: (_, __) => const DeskKnowledgePage(),
+        builder: (_, __) => const DeskKnowledgePage(
+          drawingPage: GalleryUnit(embedded: true),
+        ),
       ),
       GoRoute(
         path: AppRoute.painter.path,
-        builder: (_, __) => const GalleryUnit(),
+        redirect: (_, __) => AppRoute.knowledge.url,
       ),
       GoRoute(
         path: AppRoute.tools.path,

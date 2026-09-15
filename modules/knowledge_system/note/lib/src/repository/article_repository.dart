@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:fx_dio/fx_dio.dart';
 
 import '../env/env.dart';
@@ -32,14 +30,14 @@ abstract class ArticleRepository {
 }
 
 class HttpArticleRepository implements ArticleRepository {
-  Host get host => NoteEnv().host;
+  RequestHost<HostEnv> get host => NoteEnv().host;
 
   @override
   Future<ApiRet<bool>> create(ArticleCreatePayload payload) {
     return host.post(
       '/article',
       data: payload.apiData,
-      convertor: (rep) => rep['status'] == true,
+      convertor: (rep) => rep != null,
     );
   }
 
@@ -47,7 +45,7 @@ class HttpArticleRepository implements ArticleRepository {
   Future<ApiRet<bool>> delete(int id) {
     return host.delete(
       '/article/$id',
-      convertor: (rep) => rep['status'] == true,
+      convertor: (rep) => rep == true,
     );
   }
 
@@ -103,7 +101,7 @@ class HttpArticleRepository implements ArticleRepository {
     return host.get<Hierarchy>(
       '/category',
       convertor: (rep) {
-        return Hierarchy.fromJson(rep['data']);
+        return Hierarchy.fromJson(rep);
       },
     );
   }

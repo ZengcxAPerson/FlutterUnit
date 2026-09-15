@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/app.dart';
 import 'package:fx_updater/fx_updater.dart';
 import 'package:note/note.dart';
@@ -6,6 +8,8 @@ import 'package:draw_system/draw_system.dart';
 import 'package:storage/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fx_user_session/fx_user_session.dart';
+import 'package:unit_env/unit_env.dart';
 import 'package:widget_module/widget_module.dart';
 
 /// create by 张风捷特烈 on 2020/4/28
@@ -22,29 +26,69 @@ class AppBlocProvider extends StatefulWidget {
 }
 
 class _AppBlocProviderState extends State<AppBlocProvider> {
+  /// FrameworkX 用户会话是客户端唯一认证状态源。
+  late final FxUserSessionCubit _users = FlutterUnitUserRuntime.create();
+
+  /// 当前登录用户的头像框与徽章装配状态。
+  late final AvatarFrameCubit _avatarFrame =
+      AvatarFrameCubit(HonorRepository());
+
+  /// 当前登录用户的每日任务与长期成就状态。
+  late final ProgressionCubit _progression =
+      ProgressionCubit(ProgressionRepository());
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_users.restore());
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         // 全局 bloc : 维护应用存储状态、更新、认证
-        BlocProvider<AuthBloc>(
-            create: (_) => AuthBloc(repository: HttpAuthRepository())),
+        BlocProvider<FxUserSessionCubit>.value(value: _users),
+        BlocProvider<AvatarFrameCubit>.value(value: _avatarFrame),
+        BlocProvider<ProgressionCubit>.value(value: _progression),
         BlocProvider<AppConfigBloc>(create: (_) => AppConfigBloc()),
-        BlocProvider<UpgradeBloc>(
-            create: (_) => UpgradeBloc(api: UnitUpgradeApi())),
+        if (UnitEnv.supportsInAppUpdate)
+          BlocProvider<UpgradeBloc>(
+            create: (_) => UpgradeBloc(api: UnitUpgradeApi()),
+          ),
         BlocProvider<UserBloc>(create: (_) => UserBloc()),
         BlocProvider<NewsBloc>(create: (_) => NewsBloc()..initByCache()),
 
         BlocProvider<GalleryUnitBloc>(
             create: (_) => GalleryUnitBloc()..loadGalleryInfo()),
       ],
-      child: WidgetsBlocProvider(child: widget.child),
+      child: BlocListener<FxUserSessionCubit, FxUserSession>(
+        listener: _onUserSessionChanged,
+        child: WidgetsBlocProvider(child: widget.child),
+      ),
     );
   }
 
   @override
   void dispose() {
+    unawaited(_users.close());
+    unawaited(_avatarFrame.close());
+    unawaited(_progression.close());
     AppStorage().close();
     super.dispose();
+  }
+
+  /// 会话变化时同步或清除 FlutterUnit 用户荣誉装配状态。
+  void _onUserSessionChanged(
+    BuildContext context,
+    FxUserSession session,
+  ) {
+    if (session is FxAuthed) {
+      unawaited(_avatarFrame.load());
+      unawaited(_progression.load());
+      return;
+    }
+    _avatarFrame.clear();
+    _progression.clear();
   }
 }
